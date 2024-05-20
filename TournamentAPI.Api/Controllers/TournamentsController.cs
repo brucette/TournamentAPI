@@ -25,14 +25,18 @@ namespace TournamentAPI.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Tournament>>> GetTournament()
         {
-            return await _context.Tournaments.ToListAsync();
+            return await _context.Tournaments
+                .Include(t => t.Games)
+                .ToListAsync();
         }
 
         // GET: api/Tournaments/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Tournament>> GetTournament(int id)
         {
-            var tournament = await _context.Tournaments.FindAsync(id);
+            var tournament = await _context.Tournaments
+                .Include(t => t.Games)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tournament == null)
             {
