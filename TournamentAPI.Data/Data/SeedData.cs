@@ -84,7 +84,7 @@ namespace TournamentAPI.Data.Data
 
                     games.Add(newGame);
 
-                    // Update the index and wrap around using the modulo operator
+                    // Wrap around using the modulo operator so index doesn't go out of bound
                     index = (index + 1) % gameNames.Length;
                 }
             }
