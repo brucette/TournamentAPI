@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TournamentAPI.Data.Data;
 using TournamentAPI.Core.Entities;
+using TournamentAPI.Core.Repositories;
 
 namespace TournamentAPI.Api.Controllers
 {
@@ -14,25 +15,25 @@ namespace TournamentAPI.Api.Controllers
     [ApiController]
     public class GamesController : ControllerBase
     {
-        private readonly TournamentAPIContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public GamesController(TournamentAPIContext context)
+        public GamesController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/Games
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Game>>> GetGame()
+        public async Task<IEnumerable<Game>> GetGame()
         {
-            return await _context.Games.ToListAsync();
+            return await _unitOfWork.GameRepo.GetAllAsync();
         }
 
         // GET: api/Games/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Game>> GetGame(int id)
+        public async Task<ActionResult<Game?>> GetGame(int id)
         {
-            var game = await _context.Games.FindAsync(id);
+            var game = await _unitOfWork.GameRepo.GetAsync(id);
 
             if (game == null)
             {
@@ -43,7 +44,6 @@ namespace TournamentAPI.Api.Controllers
         }
 
         // PUT: api/Games/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutGame(int id, Game game)
         {
@@ -52,15 +52,15 @@ namespace TournamentAPI.Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(game).State = EntityState.Modified;
+            _unitOfWork.GameRepo.Update(game);
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!GameExists(id))
+                if (!await _unitOfWork.GameRepo.AnyAsync(id))
                 {
                     return NotFound();
                 }
@@ -74,12 +74,16 @@ namespace TournamentAPI.Api.Controllers
         }
 
         // POST: api/Games
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Game>> PostGame(Game game)
         {
-            _context.Games.Add(game);
-            await _context.SaveChangesAsync();
+            if (await _unitOfWork.TournamentRepo.GetAsync(game.TournamentId) == null)
+            { 
+                return BadRequest();
+            }
+
+            _unitOfWork.GameRepo.Add(game);
+            await _unitOfWork.CompleteAsync();
 
             return CreatedAtAction("GetGame", new { id = game.Id }, game);
         }
@@ -88,21 +92,16 @@ namespace TournamentAPI.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGame(int id)
         {
-            var game = await _context.Games.FindAsync(id);
+            var game = await _unitOfWork.GameRepo.GetAsync(id);
             if (game == null)
             {
                 return NotFound();
             }
 
-            _context.Games.Remove(game);
-            await _context.SaveChangesAsync();
+            _unitOfWork.GameRepo.Remove(game);
+            await _unitOfWork.CompleteAsync();
 
             return NoContent();
-        }
-
-        private bool GameExists(int id)
-        {
-            return _context.Games.Any(e => e.Id == id);
         }
     }
 }

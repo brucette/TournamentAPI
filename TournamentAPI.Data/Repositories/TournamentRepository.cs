@@ -21,12 +21,16 @@ namespace TournamentAPI.Data.Repositories
 
         public async Task<IEnumerable<Tournament>> GetAllAsync()
         { 
-            return await _context.Tournaments.ToListAsync();    
+            return await _context.Tournaments
+                .Include(t => t.Games)
+                .ToListAsync();    
         }
 
-        public async Task<Tournament> GetAsync(int id)
+        public async Task<Tournament?> GetAsync(int id)
         { 
-            return await _context.Tournaments.FindAsync(id);
+            return await _context.Tournaments
+                .Include(t => t.Games)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<bool> AnyAsync(int id)

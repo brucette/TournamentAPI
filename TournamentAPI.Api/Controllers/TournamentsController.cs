@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TournamentAPI.Data.Data;
 using TournamentAPI.Core.Entities;
+using TournamentAPI.Data.Repositories;
+using TournamentAPI.Core.Repositories;
 
 namespace TournamentAPI.Api.Controllers
 {
@@ -14,29 +16,25 @@ namespace TournamentAPI.Api.Controllers
     [ApiController]
     public class TournamentsController : ControllerBase
     {
-        private readonly TournamentAPIContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TournamentsController(TournamentAPIContext context)
+        public TournamentsController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/Tournaments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Tournament>>> GetTournament()
+        public async Task<IEnumerable<Tournament>> GetTournament()
         {
-            return await _context.Tournaments
-                .Include(t => t.Games)
-                .ToListAsync();
+            return await _unitOfWork.TournamentRepo.GetAllAsync();
         }
 
         // GET: api/Tournaments/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Tournament>> GetTournament(int id)
+        public async Task<ActionResult<Tournament?>> GetTournament(int id)
         {
-            var tournament = await _context.Tournaments
-                .Include(t => t.Games)
-                .FirstOrDefaultAsync(t => t.Id == id);
+            var tournament = await _unitOfWork.TournamentRepo.GetAsync(id);
 
             if (tournament == null)
             {
@@ -47,7 +45,6 @@ namespace TournamentAPI.Api.Controllers
         }
 
         // PUT: api/Tournaments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTournament(int id, Tournament tournament)
         {
@@ -56,15 +53,15 @@ namespace TournamentAPI.Api.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(tournament).State = EntityState.Modified;
+            _unitOfWork.TournamentRepo.Update(tournament);
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _unitOfWork.CompleteAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!TournamentExists(id))
+                if (!await _unitOfWork.TournamentRepo.AnyAsync(id))
                 {
                     return NotFound();
                 }
@@ -78,12 +75,11 @@ namespace TournamentAPI.Api.Controllers
         }
 
         // POST: api/Tournaments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Tournament>> PostTournament(Tournament tournament)
         {
-            _context.Tournaments.Add(tournament);
-            await _context.SaveChangesAsync();
+            _unitOfWork.TournamentRepo.Add(tournament);
+            await _unitOfWork.CompleteAsync();
 
             return CreatedAtAction("GetTournament", new { id = tournament.Id }, tournament);
         }
@@ -92,21 +88,16 @@ namespace TournamentAPI.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTournament(int id)
         {
-            var tournament = await _context.Tournaments.FindAsync(id);
+            var tournament = await _unitOfWork.TournamentRepo.GetAsync(id);
             if (tournament == null)
             {
                 return NotFound();
             }
 
-            _context.Tournaments.Remove(tournament);
-            await _context.SaveChangesAsync();
+            _unitOfWork.TournamentRepo.Remove(tournament);
+            await _unitOfWork.CompleteAsync();
 
             return NoContent();
-        }
-
-        private bool TournamentExists(int id)
-        {
-            return _context.Tournaments.Any(e => e.Id == id);
         }
     }
 }

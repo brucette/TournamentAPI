@@ -24,7 +24,7 @@ namespace TournamentAPI.Data.Repositories
             return await _context.Games.ToListAsync();
         }
 
-        public async Task<Game> GetAsync(int id)
+        public async Task<Game?> GetAsync(int id)
         {
             return await _context.Games.FindAsync(id);
         }
