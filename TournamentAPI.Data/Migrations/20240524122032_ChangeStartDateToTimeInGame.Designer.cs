@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TournamentAPI.Data.Data;
 
@@ -11,9 +12,11 @@ using TournamentAPI.Data.Data;
 namespace TournamentAPI.Data.Migrations
 {
     [DbContext(typeof(TournamentAPIContext))]
-    partial class TournamentAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20240524122032_ChangeStartDateToTimeInGame")]
+    partial class ChangeStartDateToTimeInGame
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

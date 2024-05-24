@@ -8,51 +8,58 @@ using Microsoft.EntityFrameworkCore;
 using TournamentAPI.Data.Data;
 using TournamentAPI.Core.Entities;
 using TournamentAPI.Core.Repositories;
+using AutoMapper;
+using TournamentAPI.Core.Dto;
 
 namespace TournamentAPI.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/tournaments/{tournamentId}/games")]
     [ApiController]
     public class GamesController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public GamesController(IUnitOfWork unitOfWork)
+        public GamesController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        // GET: api/Games
+        // GET: api/tournaments/5/games
         [HttpGet]
-        public async Task<IEnumerable<Game>> GetGame()
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetGames(int tournamentId)
         {
-            return await _unitOfWork.GameRepo.GetAllAsync();
+            var games = await _unitOfWork.GameRepo.GetAllAsync(tournamentId);
+
+            return Ok(_mapper.Map<IEnumerable<GameDto>>(games));
         }
 
-        // GET: api/Games/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Game?>> GetGame(int id)
+        // GET: api/tournaments/5/games/4
+        [HttpGet("{gameId}")]
+        public async Task<ActionResult<GameDto?>> GetGame(int tournamentId, int gameId)
         {
-            var game = await _unitOfWork.GameRepo.GetAsync(id);
+            var game = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
 
             if (game == null)
             {
                 return NotFound();
             }
 
-            return game;
+            return Ok(_mapper.Map<GameDto>(game));
         }
 
-        // PUT: api/Games/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutGame(int id, Game game)
+        // PUT: api/tournaments/5/games/4
+        [HttpPut("{gameId}")]
+        public async Task<IActionResult> PutGame(int tournamentId, int gameId, GameForUpdateDto game)
         {
-            if (id != game.Id)
-            {
-                return BadRequest();
-            }
+            // Get the game from db
+            var gameEntity = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
+            if (gameEntity == null) return NotFound();
 
-            _unitOfWork.GameRepo.Update(game);
+            var finalGame = _mapper.Map(game, gameEntity);
+
+            _unitOfWork.GameRepo.Update(finalGame);
 
             try
             {
@@ -60,7 +67,7 @@ namespace TournamentAPI.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _unitOfWork.GameRepo.AnyAsync(id))
+                if (!await _unitOfWork.GameRepo.AnyAsync(tournamentId, gameId))
                 {
                     return NotFound();
                 }
@@ -73,26 +80,30 @@ namespace TournamentAPI.Api.Controllers
             return NoContent();
         }
 
-        // POST: api/Games
+        // POST: api/tournaments/5/games
         [HttpPost]
-        public async Task<ActionResult<Game>> PostGame(Game game)
+        public async Task<ActionResult<Game>> PostGame(int tournamentId, GameForCreationDto game)
         {
-            if (await _unitOfWork.TournamentRepo.GetAsync(game.TournamentId) == null)
-            { 
-                return BadRequest();
-            }
+            // check that the tournament the game is connected to exists
+            //if (await _unitOfWork.TournamentRepo.GetAsync(tournamentId) == null)
+            //    {
+            //        return BadRequest("Tournament does not exist");
+            //    }
 
-            _unitOfWork.GameRepo.Add(game);
+            var finalGame = _mapper.Map<Game>(game);
+            finalGame.TournamentId = tournamentId;
+
+            _unitOfWork.GameRepo.Add(finalGame);
             await _unitOfWork.CompleteAsync();
 
-            return CreatedAtAction("GetGame", new { id = game.Id }, game);
+            return CreatedAtAction("GetGame", new { tournamentId = finalGame.TournamentId, gameId = finalGame.Id }, game);
         }
 
-        // DELETE: api/Games/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteGame(int id)
+        // DELETE: api/tournaments/5/games/4
+        [HttpDelete("{gameId}")]
+        public async Task<IActionResult> DeleteGame(int tournamentId, int gameId)
         {
-            var game = await _unitOfWork.GameRepo.GetAsync(id);
+            var game = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
             if (game == null)
             {
                 return NotFound();

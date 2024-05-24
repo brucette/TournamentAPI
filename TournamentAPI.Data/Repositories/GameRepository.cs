@@ -19,19 +19,23 @@ namespace TournamentAPI.Data.Repositories
             _context = context; 
         }
 
-        public async Task<IEnumerable<Game>> GetAllAsync()
+        public async Task<IEnumerable<Game>> GetAllAsync(int tournamentId)
         {
-            return await _context.Games.ToListAsync();
+            return await _context.Games
+                .Where(g => g.TournamentId == tournamentId)
+                .ToListAsync();
         }
 
-        public async Task<Game?> GetAsync(int id)
+        public async Task<Game?> GetAsync(int tournamentId, int gameId)
         {
-            return await _context.Games.FindAsync(id);
+            return await _context.Games
+                .Where(g => g.TournamentId == tournamentId)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
         }
 
-        public async Task<bool> AnyAsync(int id)
+        public async Task<bool> AnyAsync(int tournamentId, int gameId)
         {
-            return await _context.Games.AnyAsync(g => g.Id == id);
+            return await _context.Games.AnyAsync(g => g.TournamentId == tournamentId && g.Id == gameId);
         }
 
         public void Add(Game game)

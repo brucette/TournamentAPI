@@ -15,6 +15,7 @@ builder.Services.AddControllers(opt => opt.ReturnHttpNotAcceptable = true)
     .AddXmlDataContractSerializerFormatters();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddAutoMapper(typeof(TournamentMappings));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

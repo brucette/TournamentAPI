@@ -78,7 +78,7 @@ namespace TournamentAPI.Data.Data
                     var newGame = new Game
                     {
                         Title = gameNames[index],
-                        StartDate = item.StartDate.AddDays(rnd.Next(1, 10)),
+                        Time = item.StartDate.AddDays(rnd.Next(1, 10)),
                         TournamentId = item.Id
                     };
 

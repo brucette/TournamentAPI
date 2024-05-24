@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TournamentAPI.Core.Entities
+namespace TournamentAPI.Core.Dto
 {
-    public class Game
+    public class TournamentDto
     {
         public int Id { get; set; }
 
         public string Title { get; set; }
 
-        public DateTime Time { get; set; }
+        public DateTime StartDate { get; set; }
 
-        public int TournamentId { get; set; }
+        public DateTime EndDate => StartDate.AddMonths(1);
     }
 }
