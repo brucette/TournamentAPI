@@ -31,9 +31,14 @@ namespace TournamentAPI.Api.Controllers
 
         // GET: api/Tournaments
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TournamentDto>>> GetTournaments()
+        public async Task<ActionResult> GetTournaments(bool includeGames = false)
         {
-            var tournaments = await _unitOfWork.TournamentRepo.GetAllAsync();
+            var tournaments = await _unitOfWork.TournamentRepo.GetAllAsync(includeGames);
+
+            if (includeGames) 
+            {
+                return Ok(_mapper.Map<IEnumerable<TournamentWithGamesDto>>(tournaments));
+            }
 
             return Ok(_mapper.Map<IEnumerable<TournamentDto>>(tournaments));
         }
