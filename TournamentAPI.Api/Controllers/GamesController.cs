@@ -10,6 +10,7 @@ using TournamentAPI.Core.Entities;
 using TournamentAPI.Core.Repositories;
 using AutoMapper;
 using TournamentAPI.Core.Dto;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace TournamentAPI.Api.Controllers
 {
@@ -88,6 +89,45 @@ namespace TournamentAPI.Api.Controllers
             {
                 return Conflict("Concurrency conflict: The tournament was modified by another user.");
             }
+
+            return NoContent();
+        }
+
+        // PATCH: api/tournaments/5/games/4
+        [HttpPatch("api/tournaments/{tournamentId}/games/{gameId}")]
+        public async Task<ActionResult> PatchGame(
+            int tournamentId, int gameId, JsonPatchDocument<GameForUpdateDto> patchDocument)
+        {
+            if (!await TournamentExists(tournamentId))
+            {
+                return NotFound($"Tournament with ID {tournamentId} not found.");
+            }
+
+            // Get the game from db
+            var gameEntity = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
+            if (gameEntity == null) return NotFound($"Game with ID {gameId} not found.");
+
+            // patch document works on a GameForUpdateDto so we need to transorm the entity 
+            var gameToPatch = _mapper.Map<GameForUpdateDto>(gameEntity);
+
+            // then apply patch doc, passing in the ModelState will make it invalid if there are any errors, e.g. the GameForUpdateDto contains properties that don't even exist
+            patchDocument.ApplyTo(gameToPatch, ModelState);
+
+            // checks json patch doc
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // validates the dto itself as per the annotations on it
+            if (!TryValidateModel(gameToPatch))
+            {
+                return BadRequest(ModelState);
+            }
+
+            _mapper.Map(gameToPatch, gameEntity);
+
+            await _unitOfWork.CompleteAsync();
 
             return NoContent();
         }

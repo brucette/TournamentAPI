@@ -11,6 +11,8 @@ using TournamentAPI.Data.Repositories;
 using TournamentAPI.Core.Repositories;
 using AutoMapper;
 using TournamentAPI.Core.Dto;
+using Azure;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace TournamentAPI.Api.Controllers
 {
@@ -63,10 +65,8 @@ namespace TournamentAPI.Api.Controllers
 
             if (tournamentEntity == null) return NotFound($"Tournament with ID {id} not found.");
 
-
             // map from dto to entity
             var finalTournament = _mapper.Map(tournament, tournamentEntity);
-
             _unitOfWork.TournamentRepo.Update(finalTournament);
 
             try
@@ -77,6 +77,40 @@ namespace TournamentAPI.Api.Controllers
             {
                 return Conflict("Concurrency conflict: The tournament was modified by another user.");
             }
+
+            return NoContent();
+        }
+
+        // PATCH: api/Tournaments/5
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> PatchTournament(
+            int id, JsonPatchDocument<TournamentForUpdateDto> patchDocument)
+        {
+            // get the tournament as entity from db
+            var tournamentEntity = await _unitOfWork.TournamentRepo.GetAsync(id);
+            if (tournamentEntity == null) return NotFound($"Tournament with ID {id} not found.");
+
+            // patch document works on a TournamentForUpdateDto so we need to transorm the entity 
+            var tournamentToPatch = _mapper.Map<TournamentForUpdateDto>(tournamentEntity);
+
+            // then apply patch doc, passing in the ModelState will make it invalid if there are any errors, e.g. the GameForUpdateDto contains properties that don't even exist
+            patchDocument.ApplyTo(tournamentToPatch, ModelState);
+
+            // checks json patch doc
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // validates the dto itself as per the annotations on it
+            if (!TryValidateModel(tournamentToPatch))
+            {
+                return BadRequest(ModelState);
+            }
+
+            _mapper.Map(tournamentToPatch, tournamentEntity);
+
+            await _unitOfWork.CompleteAsync();
 
             return NoContent();
         }
@@ -98,7 +132,10 @@ namespace TournamentAPI.Api.Controllers
             //map to the TournamentDto that the GetTournament method returns
             var tournamentDto = _mapper.Map<TournamentDto>(finalTournament);
 
-            return CreatedAtAction("GetTournament", new { id = finalTournament.Id }, tournamentDto);
+            return CreatedAtAction(
+                "GetTournament", 
+                new { id = finalTournament.Id },
+                tournamentDto);
         }
 
         // DELETE: api/Tournaments/5
