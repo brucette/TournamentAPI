@@ -14,6 +14,6 @@ namespace TournamentAPI.Core.Dto
         public string Title { get; set; }
 
         [Required(ErrorMessage = "You should provide a start date.")]
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
     }
 }

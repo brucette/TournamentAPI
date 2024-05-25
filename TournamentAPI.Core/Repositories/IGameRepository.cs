@@ -20,5 +20,7 @@ namespace TournamentAPI.Core.Repositories
         void Update(Game game);
 
         void Remove(Game game);
+
+        Task<IEnumerable<Game>> GetAllGamesAsync();
     }
 }

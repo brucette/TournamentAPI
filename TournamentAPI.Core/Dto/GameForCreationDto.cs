@@ -14,6 +14,6 @@ namespace TournamentAPI.Core.Dto
         public string Title { get; set; }
 
         [Required(ErrorMessage = "You should provide a start time.")]
-        public DateTime Time { get; set; }
+        public DateTime? Time { get; set; }
     }
 }

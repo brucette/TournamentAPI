@@ -15,3 +15,4 @@ namespace TournamentAPI.Core.Dto
         public DateTime Time { get; set; }
     }
 }
+     

@@ -13,7 +13,6 @@ using TournamentAPI.Core.Dto;
 
 namespace TournamentAPI.Api.Controllers
 {
-    [Route("api/tournaments/{tournamentId}/games")]
     [ApiController]
     public class GamesController : ControllerBase
     {
@@ -27,35 +26,55 @@ namespace TournamentAPI.Api.Controllers
         }
 
         // GET: api/tournaments/5/games
-        [HttpGet]
+        [HttpGet("api/tournaments/{tournamentId}/games")]
         public async Task<ActionResult<IEnumerable<GameDto>>> GetGames(int tournamentId)
         {
+            // check that the tournament the game is connected to exists
+            if (!await TournamentExists(tournamentId))
+            {
+                return NotFound($"Tournament with ID {tournamentId} not found.");
+            }
+
             var games = await _unitOfWork.GameRepo.GetAllAsync(tournamentId);
 
             return Ok(_mapper.Map<IEnumerable<GameDto>>(games));
         }
 
         // GET: api/tournaments/5/games/4
-        [HttpGet("{gameId}")]
+        [HttpGet("api/tournaments/{tournamentId}/games/{gameId}")]
         public async Task<ActionResult<GameDto?>> GetGame(int tournamentId, int gameId)
         {
-            var game = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
+            if (!await TournamentExists(tournamentId))
+            {
+                return NotFound($"Tournament with ID {tournamentId} not found.");
+            }
 
+            var game = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
             if (game == null)
             {
-                return NotFound();
+                return NotFound($"Game with ID {gameId} not found.");
             }
 
             return Ok(_mapper.Map<GameDto>(game));
         }
 
         // PUT: api/tournaments/5/games/4
-        [HttpPut("{gameId}")]
+        [HttpPut("api/tournaments/{tournamentId}/games/{gameId}")]
         public async Task<IActionResult> PutGame(int tournamentId, int gameId, GameForUpdateDto game)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!await TournamentExists(tournamentId))
+            {
+                return NotFound($"Tournament with ID {tournamentId} not found.");
+            }
+
             // Get the game from db
             var gameEntity = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
-            if (gameEntity == null) return NotFound();
+            if (gameEntity == null) return NotFound($"Game with ID {gameId} not found.");
 
             var finalGame = _mapper.Map(game, gameEntity);
 
@@ -67,28 +86,25 @@ namespace TournamentAPI.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _unitOfWork.GameRepo.AnyAsync(tournamentId, gameId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return Conflict("Concurrency conflict: The tournament was modified by another user.");
             }
 
             return NoContent();
         }
 
         // POST: api/tournaments/5/games
-        [HttpPost]
-        public async Task<ActionResult<Game>> PostGame(int tournamentId, GameForCreationDto game)
+        [HttpPost("api/tournaments/{tournamentId}/games")]
+        public async Task<ActionResult<GameDto>> PostGame(int tournamentId, GameForCreationDto game)
         {
-            // check that the tournament the game is connected to exists
-            //if (await _unitOfWork.TournamentRepo.GetAsync(tournamentId) == null)
-            //    {
-            //        return BadRequest("Tournament does not exist");
-            //    }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!await TournamentExists(tournamentId))
+            {
+                return NotFound($"Tournament with ID {tournamentId} not found.");
+            }
 
             var finalGame = _mapper.Map<Game>(game);
             finalGame.TournamentId = tournamentId;
@@ -96,23 +112,46 @@ namespace TournamentAPI.Api.Controllers
             _unitOfWork.GameRepo.Add(finalGame);
             await _unitOfWork.CompleteAsync();
 
-            return CreatedAtAction("GetGame", new { tournamentId = finalGame.TournamentId, gameId = finalGame.Id }, game);
+            // map to the GameDto that the GetGame method returns
+            _mapper.Map<GameDto>(finalGame);
+
+            return CreatedAtAction("GetGame", new { tournamentId = finalGame.TournamentId, gameId = finalGame.Id }, finalGame);
         }
 
         // DELETE: api/tournaments/5/games/4
-        [HttpDelete("{gameId}")]
+        [HttpDelete("api/tournaments/{tournamentId}/games/{gameId}")]
         public async Task<IActionResult> DeleteGame(int tournamentId, int gameId)
         {
+            if (!await TournamentExists(tournamentId))
+            {
+                return NotFound($"Tournament with ID {tournamentId} not found.");
+            }
+
             var game = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
             if (game == null)
             {
-                return NotFound();
+                 return NotFound($"Game with ID {gameId} not found.");
             }
 
             _unitOfWork.GameRepo.Remove(game);
             await _unitOfWork.CompleteAsync();
 
             return NoContent();
+        }
+
+        // GET: api/games
+        [HttpGet("api/games")]
+        public async Task<ActionResult<IEnumerable<GameDto>>> GetAllExistingGames()
+        {
+            var games = await _unitOfWork.GameRepo.GetAllGamesAsync();
+
+            //return Ok(_mapper.Map<IEnumerable<GameDto>>(games));
+            return Ok(games);
+        }
+
+        private async Task<bool> TournamentExists(int tournamentId)
+        {
+            return await _unitOfWork.TournamentRepo.AnyAsync(tournamentId);
         }
     }
 }

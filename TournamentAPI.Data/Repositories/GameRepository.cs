@@ -52,5 +52,11 @@ namespace TournamentAPI.Data.Repositories
         {
             _context.Games.Remove(game);
         }
+
+        // Get all games of all tournaments
+        public async Task<IEnumerable<Game>> GetAllGamesAsync()
+        {
+            return await _context.Games.ToListAsync();
+        }
     }
 }
