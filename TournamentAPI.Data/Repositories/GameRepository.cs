@@ -33,6 +33,13 @@ namespace TournamentAPI.Data.Repositories
                 .FirstOrDefaultAsync(g => g.Id == gameId);
         }
 
+        public async Task<Game?> GetByTitleAsync(int tournamentId, string title)
+        {
+            return await _context.Games
+                .Where(g => g.TournamentId == tournamentId)
+                .FirstOrDefaultAsync(g => g.Title == title);
+        }
+
         public async Task<bool> AnyAsync(int tournamentId, int gameId)
         {
             return await _context.Games.AnyAsync(g => g.TournamentId == tournamentId && g.Id == gameId);

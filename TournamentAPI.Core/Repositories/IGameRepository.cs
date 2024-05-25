@@ -13,6 +13,8 @@ namespace TournamentAPI.Core.Repositories
 
         Task<Game?> GetAsync(int tournamentId, int gameId);
 
+        Task<Game?> GetByTitleAsync(int tournamentId, string title);
+
         Task<bool> AnyAsync(int tournamentId, int gameId);
 
         void Add(Game game);

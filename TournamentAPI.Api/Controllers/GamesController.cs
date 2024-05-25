@@ -41,19 +41,19 @@ namespace TournamentAPI.Api.Controllers
             return Ok(_mapper.Map<IEnumerable<GameDto>>(games));
         }
 
-        // GET: api/tournaments/5/games/4
-        [HttpGet("api/tournaments/{tournamentId}/games/{gameId}")]
-        public async Task<ActionResult<GameDto?>> GetGame(int tournamentId, int gameId)
+        // GET: api/tournaments/5/games/title/Champions Battle
+        [HttpGet("api/tournaments/{tournamentId}/games/title/{title}")]
+        public async Task<ActionResult<GameDto?>> GetGame(int tournamentId, string title)
         {
             if (!await TournamentExists(tournamentId))
             {
                 return NotFound($"Tournament with ID {tournamentId} not found.");
             }
 
-            var game = await _unitOfWork.GameRepo.GetAsync(tournamentId, gameId);
+            var game = await _unitOfWork.GameRepo.GetByTitleAsync(tournamentId, title);
             if (game == null)
             {
-                return NotFound($"Game with ID {gameId} not found.");
+                return NotFound($"Game with the title {title} not found.");
             }
 
             return Ok(_mapper.Map<GameDto>(game));
