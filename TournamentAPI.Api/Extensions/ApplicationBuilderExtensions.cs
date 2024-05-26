@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Api.Extensions
+﻿namespace TournamentAPI.Api.Extensions
 {
     public static class ApplicationBuilderExtensions
     {

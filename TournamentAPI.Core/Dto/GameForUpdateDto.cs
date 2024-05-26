@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Core.Dto
+﻿namespace TournamentAPI.Core.Dto
 {
     public class GameForUpdateDto
     {

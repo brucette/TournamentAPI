@@ -1,5 +1,4 @@
-﻿
-#nullable disable
+﻿#nullable disable
 
 namespace TournamentAPI.Data.Migrations
 {

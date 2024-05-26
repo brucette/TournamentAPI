@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Api.Controllers
+﻿namespace TournamentAPI.Api.Controllers
 {
     [ApiController]
     public class GamesController : ControllerBase

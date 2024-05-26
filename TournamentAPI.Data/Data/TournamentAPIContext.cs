@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TournamentAPI.Core.Entities;
-
-namespace TournamentAPI.Data.Data
+﻿namespace TournamentAPI.Data.Data
 {
     public class TournamentAPIContext : DbContext
     {

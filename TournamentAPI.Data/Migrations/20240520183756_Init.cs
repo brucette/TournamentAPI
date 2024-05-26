@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Data.Migrations
+﻿namespace TournamentAPI.Data.Migrations
 {
     /// <inheritdoc />
     public partial class Init : Migration

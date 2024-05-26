@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Core.Repositories
+﻿namespace TournamentAPI.Core.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {

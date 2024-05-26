@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Data.Repositories
+﻿namespace TournamentAPI.Data.Repositories
 {
     public class TournamentRepository : ITournamentRepository
     {

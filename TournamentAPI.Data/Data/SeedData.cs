@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Data.Data
+﻿namespace TournamentAPI.Data.Data
 {
     public class SeedData
     {

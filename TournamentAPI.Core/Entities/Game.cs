@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Core.Entities
+﻿namespace TournamentAPI.Core.Entities
 {
     public class Game
     {

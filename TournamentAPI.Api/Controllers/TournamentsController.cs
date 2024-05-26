@@ -1,5 +1,4 @@
-﻿
-namespace TournamentAPI.Api.Controllers
+﻿namespace TournamentAPI.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -1,4 +1,3 @@
-
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TournamentAPIContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("TournamentAPIContext") ?? throw new InvalidOperationException("Connection string 'TournamentAPIContext' not found.")));
