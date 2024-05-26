@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TournamentAPI.Data.Data;
-using TournamentAPI.Data.Repositories;
-
+﻿
 namespace TournamentAPI.Core.Repositories
 {
     public class UnitOfWork : IUnitOfWork

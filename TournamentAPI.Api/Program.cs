@@ -1,8 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using TournamentAPI.Api.Extensions;
-using TournamentAPI.Core.Repositories;
-using TournamentAPI.Data.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TournamentAPIContext>(options =>

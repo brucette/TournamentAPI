@@ -1,0 +1,9 @@
+﻿global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.AspNetCore.JsonPatch;
+global using TournamentAPI.Core.Entities;
+global using TournamentAPI.Core.Repositories;
+global using TournamentAPI.Core.Dto;
+global using TournamentAPI.Api.Extensions;
+global using TournamentAPI.Data.Data;
+global using AutoMapper;

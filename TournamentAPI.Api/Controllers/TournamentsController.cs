@@ -1,19 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc; 
-using Microsoft.EntityFrameworkCore;
-using TournamentAPI.Data.Data;
-using TournamentAPI.Core.Entities;
-using TournamentAPI.Data.Repositories;
-using TournamentAPI.Core.Repositories;
-using AutoMapper;
-using TournamentAPI.Core.Dto;
-using Azure;
-using Microsoft.AspNetCore.JsonPatch;
-
+﻿
 namespace TournamentAPI.Api.Controllers
 {
     [Route("api/[controller]")]
