@@ -17,6 +17,6 @@ namespace TournamentAPI.Core.Dto
 
         public DateTime EndDate => StartDate.AddMonths(1);
 
-        public ICollection<Game> Games { get; set; } = new List<Game>();
+        public ICollection<GameDto> Games { get; set; } = new List<GameDto>();
     }
 }

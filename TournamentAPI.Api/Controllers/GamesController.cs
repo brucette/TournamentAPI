@@ -153,9 +153,9 @@ namespace TournamentAPI.Api.Controllers
             await _unitOfWork.CompleteAsync();
 
             // map to the GameDto that the GetGame method returns
-            _mapper.Map<GameDto>(finalGame);
+            var gameDto = _mapper.Map<GameDto>(finalGame);
 
-            return CreatedAtAction("GetGame", new { tournamentId = finalGame.TournamentId, gameId = finalGame.Id }, finalGame);
+            return CreatedAtAction("GetGame", new { tournamentId = finalGame.TournamentId, title = finalGame.Title }, gameDto);
         }
 
         // DELETE: api/tournaments/5/games/4
@@ -184,8 +184,6 @@ namespace TournamentAPI.Api.Controllers
         public async Task<ActionResult<IEnumerable<GameDto>>> GetAllExistingGames()
         {
             var games = await _unitOfWork.GameRepo.GetAllGamesAsync();
-
-            //return Ok(_mapper.Map<IEnumerable<GameDto>>(games));
             return Ok(games);
         }
 

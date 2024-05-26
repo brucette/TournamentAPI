@@ -16,11 +16,10 @@ namespace TournamentAPI.Data.Data
             CreateMap<Core.Entities.Tournament, Core.Dto.TournamentDto>();
             CreateMap<Core.Entities.Tournament, Core.Dto.TournamentDto>().ReverseMap();
             CreateMap<Core.Entities.Tournament, Core.Dto.TournamentWithGamesDto>();
-
-            CreateMap<Core.Dto.TournamentForCreationDto, Core.Entities.Tournament>();
-            CreateMap<Core.Dto.TournamentForCreationDto, Core.Entities.Tournament>().ReverseMap();
             CreateMap<Core.Dto.TournamentForUpdateDto, Core.Entities.Tournament>();
             CreateMap<Core.Dto.TournamentForUpdateDto, Core.Entities.Tournament>().ReverseMap();
+            CreateMap<Core.Dto.TournamentForCreationDto, Core.Entities.Tournament>();
+            CreateMap<Core.Dto.TournamentForCreationDto, Core.Entities.Tournament>().ReverseMap();
             CreateMap<Core.Dto.TournamentForCreationDto, Core.Dto.TournamentDto>();
 
             // Games
